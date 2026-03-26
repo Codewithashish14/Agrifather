@@ -1,4 +1,6 @@
 require('dotenv').config({ path: process.env.DOTENV_PATH || '/etc/secrets/.env' });
+// Debug: Print MONGODB_URI to verify it is set in Render
+console.log('MONGODB_URI:', process.env.MONGODB_URI);
 const connectDB = require('./database/mongo');
 const express = require('express');
 const cors = require('cors');
