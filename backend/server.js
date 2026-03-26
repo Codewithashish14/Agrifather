@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: process.env.DOTENV_PATH || '/etc/secrets/.env' });
 const connectDB = require('./database/mongo');
 const express = require('express');
 const cors = require('cors');
