@@ -2,7 +2,18 @@
 require('dotenv').config({ path: process.env.DOTENV_PATH || '/etc/secrets/.env' });
 // Debug: Print all environment variables to verify they are set in Render
 console.log('ENV VARS:', process.env);
-// Database connection removed (using lowdb or other storage)
+
+// MongoDB (Mongoose) connection
+const mongoose = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log('✅ Connected to MongoDB Atlas'))
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
