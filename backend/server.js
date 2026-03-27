@@ -28,13 +28,15 @@ app.use(helmet({
 }));
 
 // CORS
+
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
-  'https://agrifather.vercel.app'
+  'https://agrifather.vercel.app',
+  'https://agrifather-pftv0o3nl-codewithashish14s-projects.vercel.app'
 ];
 
 app.use(cors({
