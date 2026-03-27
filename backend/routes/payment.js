@@ -36,7 +36,10 @@ router.post('/create-order', authenticate, async (req, res) => {
     }
     const amount = plan === 'monthly' ? 39900 : 419900;
     const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
-    const order = await razorpay.orders.create({ amount, currency: 'INR', receipt: `agrifather_${req.user.id}_${Date.now()}`, notes: { userId: req.user.id, plan } });
+    // Razorpay requires receipt to be <= 40 chars
+    let receipt = `agrifather_${req.user.id}_${Date.now()}`;
+    if (receipt.length > 40) receipt = receipt.slice(0, 40);
+    const order = await razorpay.orders.create({ amount, currency: 'INR', receipt, notes: { userId: req.user.id, plan } });
     await createPayment({ id: uuidv4(), user_id: req.user.id, razorpay_order_id: order.id, plan, amount });
     res.json({ orderId: order.id, amount: order.amount, currency: order.currency, keyId: process.env.RAZORPAY_KEY_ID, userName: req.user.name, userEmail: req.user.email, userPhone: req.user.phone || '' });
   } catch (err) { console.error(err); res.status(500).json({ error: 'Failed to create order.' }); }
