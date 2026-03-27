@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Source+Sans+3:wght@300;400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap');
+
+:root {
+  --primary: #14532d;
+  --primary-light: #16a34a;
+  --accent: #d97706;
+  --accent-light: #f59e0b;
+  --soil: #92400e;
+  --bg: #fafaf9;
+  --text: #1c1917;
+  --text-muted: #78716c;
+  --border: #e7e5e4;
+  --card: #ffffff;
+  --sidebar-width: 280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Source Sans 3', system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f5f5f4;
+}
+::-webkit-scrollbar-thumb {
+  background: #a8a29e;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #78716c;
+}
+
+/* Markdown styles in chat */
+.prose-agri h1, .prose-agri h2, .prose-agri h3 {
+  font-family: 'Playfair Display', serif;
+  color: #14532d;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.prose-agri p { margin-bottom: 0.75rem; line-height: 1.7; }
+.prose-agri ul, .prose-agri ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.prose-agri li { margin-bottom: 0.35rem; line-height: 1.6; }
+.prose-agri strong { color: #14532d; font-weight: 600; }
+.prose-agri em { color: #92400e; }
+.prose-agri code {
+  background: #f0fdf4;
+  color: #14532d;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.prose-agri pre {
+  background: #1c2b1e;
+  color: #86efac;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.prose-agri blockquote {
+  border-left: 4px solid #22c55e;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #57534e;
+  font-style: italic;
+}
+.prose-agri table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.prose-agri th { background: #f0fdf4; color: #14532d; padding: 8px 12px; text-align: left; font-weight: 600; }
+.prose-agri td { padding: 8px 12px; border-bottom: 1px solid #e7e5e4; }
+.prose-agri tr:hover td { background: #fafaf9; }
+
+/* Typing animation */
+.typing-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+  30% { transform: translateY(-8px); opacity: 1; }
+}
+
+/* Voice recording pulse */
+@keyframes voice-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
+.voice-recording {
+  animation: voice-pulse 1.5s ease-in-out infinite;
+}
+
+/* Page transition */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #14532d, #22c55e, #d97706);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-dark {
+  background: rgba(5, 46, 22, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* Grain texture overlay */
+.grain::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+}
+
+/* Shimmer loading */
+.shimmer {
+  background: linear-gradient(90deg, #f5f5f4 25%, #e7e5e4 50%, #f5f5f4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Chat message animations */
+.message-appear {
+  animation: messageAppear 0.3s ease-out forwards;
+}
+
+@keyframes messageAppear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sidebar */
+.sidebar-item {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer;
+}
+.sidebar-item:hover {
+  @apply bg-forest-50 text-forest-700;
+}
+.sidebar-item.active {
+  @apply bg-forest-600 text-white shadow-sm;
+}
+
+/* Buttons */
+.btn-primary {
+  @apply bg-forest-600 hover:bg-forest-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+}
+.btn-secondary {
+  @apply bg-earth-500 hover:bg-earth-600 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+}
+.btn-outline {
+  @apply border-2 border-forest-600 text-forest-700 hover:bg-forest-50 font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 active:scale-95;
+}
+.btn-ghost {
+  @apply text-stone-600 hover:text-forest-700 hover:bg-forest-50 font-medium px-4 py-2 rounded-xl transition-all duration-200;
+}
+
+/* Input styles */
+.input-field {
+  @apply w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-all duration-200;
+}
+
+/* Cards */
+.card {
+  @apply bg-white rounded-2xl shadow-sm border border-stone-100 p-5;
+}
+.card-hover {
+  @apply card hover:shadow-agri hover:-translate-y-0.5 transition-all duration-200 cursor-pointer;
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
+}
+.badge-green { @apply badge bg-forest-100 text-forest-700; }
+.badge-amber { @apply badge bg-amber-100 text-amber-700; }
+.badge-red { @apply badge bg-red-100 text-red-700; }
+.badge-blue { @apply badge bg-blue-100 text-blue-700; }
+
+/* Language toggle */
+.lang-btn {
+  @apply px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer;
+}
+.lang-btn.selected {
+  @apply bg-forest-600 text-white;
+}
+.lang-btn:not(.selected) {
+  @apply text-stone-600 hover:bg-forest-50 hover:text-forest-700;
+}

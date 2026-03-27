@@ -1,0 +1,16 @@
+{
+  "name": "AGRIFATHER - AI Assistant for Farmers",
+  "short_name": "AGRIFATHER",
+  "description": "The World's Most Advanced AI Assistant for Farmers. Get expert agricultural advice in Hindi, English and regional languages.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#14532d",
+  "theme_color": "#14532d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
