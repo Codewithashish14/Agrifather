@@ -1,11 +1,20 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import {
-  MessageSquare, Cloud, TrendingUp, Bell, User, Crown,
-  LogOut, Menu, X, Sprout, ChevronRight, Settings,
-  AlertTriangle, Mic
-} from 'lucide-react';
+import MessageSquare from 'lucide-react/lib/icons/message-square';
+import Cloud from 'lucide-react/lib/icons/cloud';
+import TrendingUp from 'lucide-react/lib/icons/trending-up';
+import Bell from 'lucide-react/lib/icons/bell';
+import User from 'lucide-react/lib/icons/user';
+import Crown from 'lucide-react/lib/icons/crown';
+import LogOut from 'lucide-react/lib/icons/log-out';
+import Menu from 'lucide-react/lib/icons/menu';
+import X from 'lucide-react/lib/icons/x';
+import Sprout from 'lucide-react/lib/icons/sprout';
+import ChevronRight from 'lucide-react/lib/icons/chevron-right';
+import Settings from 'lucide-react/lib/icons/settings';
+import AlertTriangle from 'lucide-react/lib/icons/alert-triangle';
+import Mic from 'lucide-react/lib/icons/mic';
 import toast from 'react-hot-toast';
 
 const navItems = [
