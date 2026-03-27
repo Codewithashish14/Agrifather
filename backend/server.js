@@ -1,16 +1,13 @@
+
 require('dotenv').config({ path: process.env.DOTENV_PATH || '/etc/secrets/.env' });
 // Debug: Print all environment variables to verify they are set in Render
 console.log('ENV VARS:', process.env);
-const connectDB = require('./database/mongo');
+// Database connection removed (using lowdb or other storage)
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-
-
-// Connect to MongoDB
-connectDB();
 
 const app = express();
 
