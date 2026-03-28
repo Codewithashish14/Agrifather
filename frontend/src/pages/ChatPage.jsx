@@ -268,8 +268,7 @@ export default function ChatPage() {
       {/* Desktop Sidebar with hide/show toggle */}
       <aside className={`hidden lg:flex flex-col bg-white border-r border-stone-200 transition-all duration-300 ${sidebarVisible ? 'w-64' : 'w-0 overflow-hidden'}`} style={{ minWidth: sidebarVisible ? '16rem' : 0, width: sidebarVisible ? '16rem' : 0 }}>
         {sidebarVisible && (
-          <div className="flex flex-col h-full">
-            {/* ...existing sidebar content... */}
+          <>{/* Sidebar content start */}
             <div className="p-4 border-b border-stone-100">
               <button
                 onClick={newChat}
@@ -320,12 +319,12 @@ export default function ChatPage() {
                 <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
                   <div className="flex justify-between text-xs mb-1.5">
                     <span className="text-amber-700 font-medium">Daily Messages</span>
-                    <span className="text-amber-600 font-bold">{user?.messages_today || 0}/{isPro ? '∞' : 10}</span>
+                    <span className="text-amber-600 font-bold">{msgCount}/{msgLimit}</span>
                   </div>
                   <div className="w-full bg-amber-100 rounded-full h-1.5">
                     <div
                       className="bg-amber-500 rounded-full h-1.5 transition-all"
-                      style={{ width: `${Math.min(100, ((user?.messages_today || 0) / 10) * 100)}%` }}
+                      style={{ width: `${Math.min(100, (msgCount / 10) * 100)}%` }}
                     />
                   </div>
                   <button
@@ -346,7 +345,7 @@ export default function ChatPage() {
                 </div>
               )}
             </div>
-          </div>
+          </>
         )}
       </aside>
 
@@ -371,7 +370,83 @@ export default function ChatPage() {
             >
               <X size={20} />
             </button>
-            {/* ...existing sidebar content... */}
+            {/* Sidebar content for mobile */}
+            <div className="p-4 border-b border-stone-100">
+              <button
+                onClick={newChat}
+                className="w-full flex items-center justify-center gap-2 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm shadow-sm"
+              >
+                <Plus size={16} /> New Chat
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider px-2 mb-2">Recent Conversations</p>
+              {loadingConvs ? (
+                Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="shimmer h-14 rounded-xl mb-1" />
+                ))
+              ) : conversations.length === 0 ? (
+                <div className="text-center py-8 text-stone-400 text-sm">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  No conversations yet
+                </div>
+              ) : (
+                conversations.map(conv => (
+                  <div
+                    key={conv.id}
+                    onClick={() => navigate(`/dashboard/chat/${conv.id}`)}
+                    className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 ${
+                      currentConvId === conv.id ? 'bg-forest-50 border border-forest-200' : 'hover:bg-stone-50'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-stone-800 truncate">{conv.title || 'New conversation'}</p>
+                      <p className="text-xs text-stone-400 truncate">{conv.message_count} messages</p>
+                    </div>
+                    <button
+                      onClick={(e) => deleteConversation(conv.id, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-red-500 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      disabled={user?.id !== conv.user_id}
+                      title={user?.id !== conv.user_id ? 'You can only delete your own conversations' : 'Delete conversation'}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            {/* Usage meter */}
+            <div className="p-4 border-t border-stone-100">
+              {!isPro && (
+                <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-amber-700 font-medium">Daily Messages</span>
+                    <span className="text-amber-600 font-bold">{msgCount}/{msgLimit}</span>
+                  </div>
+                  <div className="w-full bg-amber-100 rounded-full h-1.5">
+                    <div
+                      className="bg-amber-500 rounded-full h-1.5 transition-all"
+                      style={{ width: `${Math.min(100, (msgCount / 10) * 100)}%` }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => navigate('/dashboard/pricing')}
+                    className="mt-2 w-full flex items-center justify-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800"
+                  >
+                    <Crown size={12}/> Upgrade for unlimited
+                  </button>
+                </div>
+              )}
+              {isPro && (
+                <div className="flex items-center gap-2 bg-forest-50 rounded-xl p-3">
+                  <Crown size={16} className="text-amber-500" />
+                  <div>
+                    <p className="text-xs font-bold text-forest-700">Pro Plan Active</p>
+                    <p className="text-xs text-forest-500">Unlimited messages</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </aside>
         </div>
       )}
