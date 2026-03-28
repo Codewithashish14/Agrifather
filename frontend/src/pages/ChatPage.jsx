@@ -3,23 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
-    try {
-      setSending(true);
-      const res = await axios.post('/chat/message', {
-        conversation_id: selectedConversationId,
-        content: input,
-        language: selectedLang,
-      });
-      setInput('');
-      await fetchMessages(selectedConversationId);
-      await fetchConversations();
-      // Refresh user to update daily message limit
-      refreshUser();
-    } catch (err) {
-      toast.error(err?.response?.data?.error || 'Failed to send message');
-    } finally {
-      setSending(false);
-    }
 }
 
 const QUICK_TOPICS = [
