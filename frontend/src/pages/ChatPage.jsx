@@ -3,21 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
-import {
-  Send, Mic, MicOff, ImagePlus, X, Plus, Crown,
-  Trash2, Wheat, Leaf, Bug, Droplets, Sun, Landmark,
-  BarChart3, Sprout, ChevronDown, Volume2, VolumeX, Loader2,
-  MessageSquare
-} from 'lucide-react';
-
-// Simple markdown parser
-function parseMarkdown(text) {
-  if (!text) return '';
-  return text
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    try {
+      setSending(true);
+      const res = await axios.post('/chat/message', {
+        conversation_id: selectedConversationId,
+        content: input,
+        language: selectedLang,
+      });
+      setInput('');
+      await fetchMessages(selectedConversationId);
+      await fetchConversations();
+      // Refresh user to update daily message limit
+      refreshUser();
+    } catch (err) {
+      toast.error(err?.response?.data?.error || 'Failed to send message');
+    } finally {
+      setSending(false);
+    }
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
@@ -70,6 +72,13 @@ export default function ChatPage() {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState(user?.language || 'hi');
+
+  // Update selectedLang if user.language changes (e.g., after backend update)
+  useEffect(() => {
+    if (user?.language && user.language !== selectedLang) {
+      setSelectedLang(user.language);
+    }
+  }, [user?.language]);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -141,10 +150,13 @@ export default function ChatPage() {
       const aiMsg = { id: data.messageId, role: 'assistant', content: data.message };
       setMessages(prev => [...prev, aiMsg]);
 
+
+      // Always refresh conversations after sending a message
+      fetchConversations();
+
       if (!currentConvId) {
         setCurrentConvId(data.conversationId);
         navigate(`/dashboard/chat/${data.conversationId}`, { replace: true });
-        fetchConversations();
       }
 
       // Auto-speak if voice enabled
@@ -179,8 +191,15 @@ export default function ChatPage() {
     e.stopPropagation();
     try {
       await axios.delete(`/chat/conversations/${cid}`);
+      // Remove only the deleted conversation from the list
       setConversations(prev => prev.filter(c => c.id !== cid));
-      if (currentConvId === cid) newChat();
+      // If the deleted conversation is currently open, reset to new chat
+      if (currentConvId === cid) {
+        newChat();
+      } else {
+        // Otherwise, just refresh the messages for the current conversation
+        if (currentConvId) fetchMessages(currentConvId);
+      }
       toast.success('Conversation deleted');
     } catch { toast.error('Failed to delete'); }
   };
@@ -301,7 +320,9 @@ export default function ChatPage() {
                 </div>
                 <button
                   onClick={(e) => deleteConversation(conv.id, e)}
-                  className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-red-500 rounded-lg transition-all"
+                  className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-red-500 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={user?.id !== conv.user_id}
+                  title={user?.id !== conv.user_id ? 'You can only delete your own conversations' : 'Delete conversation'}
                 >
                   <Trash2 size={14} />
                 </button>
@@ -372,7 +393,16 @@ export default function ChatPage() {
               {LANGUAGES.slice(0, 4).map(lang => (
                 <button
                   key={lang.code}
-                  onClick={() => setSelectedLang(lang.code)}
+                  onClick={async () => {
+                    setSelectedLang(lang.code);
+                    // If user changes language, update backend and refresh user
+                    if (user?.language !== lang.code) {
+                      try {
+                        await axios.put('/auth/profile', { language: lang.code });
+                        refreshUser();
+                      } catch {}
+                    }
+                  }}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                     selectedLang === lang.code ? 'bg-forest-600 text-white' : 'text-stone-600 hover:text-forest-700'
                   }`}
@@ -469,11 +499,12 @@ export default function ChatPage() {
                   }`}>
                     {msg.role === 'assistant' ? (
                       <div
-                        className="prose-agri text-sm leading-relaxed"
+                        className="prose-agri text-base leading-relaxed"
+                        style={{ fontSize: '1.15rem' }}
                         dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
                       />
                     ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-base leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                     )}
                   </div>
                   {msg.role === 'assistant' && (

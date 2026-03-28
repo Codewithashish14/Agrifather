@@ -16,9 +16,11 @@ const navItems = [
   { icon: User, label: 'Profile', labelHi: 'प्रोफाइल', path: '/dashboard/profile' },
 ];
 
+
 export default function DashboardLayout() {
   const { user, logout, isPro } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true); // for desktop
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -125,10 +127,20 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex h-screen bg-stone-50 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-gradient-to-b from-forest-950 via-forest-900 to-forest-950 flex-shrink-0">
-        <SidebarContent />
+      {/* Desktop Sidebar with hide/show toggle */}
+      <aside className={`hidden lg:flex flex-col w-64 bg-gradient-to-b from-forest-950 via-forest-900 to-forest-950 flex-shrink-0 transition-all duration-300 ${sidebarVisible ? '' : 'lg:w-0 overflow-hidden'}`} style={{ minWidth: sidebarVisible ? '16rem' : 0, width: sidebarVisible ? '16rem' : 0 }}>
+        {sidebarVisible && <SidebarContent />}
       </aside>
+
+      {/* Sidebar hide/show button for desktop */}
+      <button
+        className="hidden lg:block absolute top-4 left-64 z-30 bg-forest-900 text-forest-200 hover:text-white hover:bg-forest-800 rounded-full p-1.5 shadow transition-all duration-200"
+        style={{ left: sidebarVisible ? '16rem' : '0.5rem', transition: 'left 0.3s' }}
+        onClick={() => setSidebarVisible(v => !v)}
+        title={sidebarVisible ? 'Hide menu' : 'Show menu'}
+      >
+        {sidebarVisible ? <ChevronRight size={18} className="rotate-180" /> : <ChevronRight size={18} />}
+      </button>
 
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
