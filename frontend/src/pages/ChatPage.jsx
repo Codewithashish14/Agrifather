@@ -40,6 +40,7 @@ export default function ChatPage() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true); // for desktop
   const [selectedLang, setSelectedLang] = useState(user?.language || 'hi');
 
   // Update selectedLang if user.language changes (e.g., after backend update)
@@ -59,9 +60,19 @@ export default function ChatPage() {
   useEffect(() => { fetchConversations(); fetchSuggestions(); }, []);
 
   useEffect(() => {
-    if (convId) { setCurrentConvId(convId); fetchMessages(convId); }
-    else { setMessages([]); setCurrentConvId(null); }
+    if (convId) {
+      setCurrentConvId(convId);
+      fetchMessages(convId);
+    } else {
+      setMessages([]);
+      setCurrentConvId(null);
+    }
   }, [convId]);
+
+  // Always fetch messages when currentConvId changes (for chat history)
+  useEffect(() => {
+    if (currentConvId) fetchMessages(currentConvId);
+  }, [currentConvId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -119,9 +130,9 @@ export default function ChatPage() {
       const aiMsg = { id: data.messageId, role: 'assistant', content: data.message };
       setMessages(prev => [...prev, aiMsg]);
 
-
-      // Always refresh conversations after sending a message
-      fetchConversations();
+      // Always refresh conversations and user after sending a message
+      await fetchConversations();
+      await refreshUser();
 
       if (!currentConvId) {
         setCurrentConvId(data.conversationId);
@@ -132,8 +143,6 @@ export default function ChatPage() {
       if (user?.voice_enabled) {
         speak(data.message.replace(/<[^>]+>/g, '').substring(0, 300));
       }
-
-      refreshUser();
     } catch (err) {
       const errMsg = err.response?.data?.error || 'Failed to get response';
       if (err.response?.status === 429 && err.response?.data?.upgradeRequired) {
@@ -242,7 +251,10 @@ export default function ChatPage() {
     synth.current.speak(utt);
   };
 
-  const stopSpeaking = () => { synth.current?.cancel(); setIsSpeaking(false); };
+  const stopSpeaking = () => {
+    synth.current?.cancel();
+    setIsSpeaking(false);
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -253,8 +265,116 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Conversations Sidebar */}
-      <div className={`${sidebarOpen ? 'w-72' : 'w-0 lg:w-64'} flex-shrink-0 transition-all duration-300 overflow-hidden border-r border-stone-200 bg-white flex flex-col`}>
+      {/* Desktop Sidebar with hide/show toggle */}
+      <aside className={`hidden lg:flex flex-col bg-white border-r border-stone-200 transition-all duration-300 ${sidebarVisible ? 'w-64' : 'w-0 overflow-hidden'}`} style={{ minWidth: sidebarVisible ? '16rem' : 0, width: sidebarVisible ? '16rem' : 0 }}>
+        {sidebarVisible && (
+          <div className="flex flex-col h-full">
+            {/* ...existing sidebar content... */}
+            <div className="p-4 border-b border-stone-100">
+              <button
+                onClick={newChat}
+                className="w-full flex items-center justify-center gap-2 bg-forest-600 hover:bg-forest-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 text-sm shadow-sm"
+              >
+                <Plus size={16} /> New Chat
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider px-2 mb-2">Recent Conversations</p>
+              {loadingConvs ? (
+                Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="shimmer h-14 rounded-xl mb-1" />
+                ))
+              ) : conversations.length === 0 ? (
+                <div className="text-center py-8 text-stone-400 text-sm">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  No conversations yet
+                </div>
+              ) : (
+                conversations.map(conv => (
+                  <div
+                    key={conv.id}
+                    onClick={() => navigate(`/dashboard/chat/${conv.id}`)}
+                    className={`group flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 ${
+                      currentConvId === conv.id ? 'bg-forest-50 border border-forest-200' : 'hover:bg-stone-50'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-stone-800 truncate">{conv.title || 'New conversation'}</p>
+                      <p className="text-xs text-stone-400 truncate">{conv.message_count} messages</p>
+                    </div>
+                    <button
+                      onClick={(e) => deleteConversation(conv.id, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-stone-400 hover:text-red-500 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      disabled={user?.id !== conv.user_id}
+                      title={user?.id !== conv.user_id ? 'You can only delete your own conversations' : 'Delete conversation'}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            {/* Usage meter */}
+            <div className="p-4 border-t border-stone-100">
+              {!isPro && (
+                <div className="bg-amber-50 rounded-xl p-3 border border-amber-100">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-amber-700 font-medium">Daily Messages</span>
+                    <span className="text-amber-600 font-bold">{user?.messages_today || 0}/{isPro ? '∞' : 10}</span>
+                  </div>
+                  <div className="w-full bg-amber-100 rounded-full h-1.5">
+                    <div
+                      className="bg-amber-500 rounded-full h-1.5 transition-all"
+                      style={{ width: `${Math.min(100, ((user?.messages_today || 0) / 10) * 100)}%` }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => navigate('/dashboard/pricing')}
+                    className="mt-2 w-full flex items-center justify-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-800"
+                  >
+                    <Crown size={12}/> Upgrade for unlimited
+                  </button>
+                </div>
+              )}
+              {isPro && (
+                <div className="flex items-center gap-2 bg-forest-50 rounded-xl p-3">
+                  <Crown size={16} className="text-amber-500" />
+                  <div>
+                    <p className="text-xs font-bold text-forest-700">Pro Plan Active</p>
+                    <p className="text-xs text-forest-500">Unlimited messages</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Sidebar hide/show button for desktop */}
+      <button
+        className="hidden lg:block absolute top-4 left-64 z-30 bg-forest-900 text-forest-200 hover:text-white hover:bg-forest-800 rounded-full p-1.5 shadow transition-all duration-200"
+        style={{ left: sidebarVisible ? '16rem' : '0.5rem', transition: 'left 0.3s' }}
+        onClick={() => setSidebarVisible(v => !v)}
+        title={sidebarVisible ? 'Hide menu' : 'Show menu'}
+      >
+        {sidebarVisible ? <ChevronRight size={18} className="rotate-180" /> : <ChevronRight size={18} />}
+      </button>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+          <aside className="relative z-10 w-72 bg-gradient-to-b from-forest-950 via-forest-900 to-forest-950 flex flex-col shadow-2xl">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="absolute top-4 right-4 text-forest-300 hover:text-white p-1.5 rounded-lg hover:bg-forest-800 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            {/* ...existing sidebar content... */}
+          </aside>
+        </div>
+      )}
         <div className="p-4 border-b border-stone-100">
           <button
             onClick={newChat}
@@ -381,16 +501,20 @@ export default function ChatPage() {
               ))}
             </div>
 
-            {isSpeaking && (
-              <button onClick={stopSpeaking} className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100">
-                <VolumeX size={16} />
-              </button>
-            )}
+            {/* Play/Pause (Listen/Stop) button, toggles with isSpeaking */}
+            <button
+              onClick={isSpeaking ? stopSpeaking : () => speak(messages.filter(m => m.role === 'assistant').slice(-1)[0]?.content?.replace(/<[^>]+>/g, ''))}
+              className={`p-2 rounded-xl transition-all ${isSpeaking ? 'bg-red-50 text-red-500 hover:bg-red-100' : 'text-stone-400 hover:text-forest-600 hover:bg-forest-50'}`}
+              title={isSpeaking ? 'Pause' : 'Listen'}
+              disabled={messages.filter(m => m.role === 'assistant').length === 0}
+            >
+              {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
           </div>
         </div>
 
         {/* Messages area */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-5" style={{ background: 'linear-gradient(180deg, #f7fdf9 0%, #fafaf9 100%)' }}>
+        <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6 space-y-5" style={{ background: 'linear-gradient(180deg, #f7fdf9 0%, #fafaf9 100%)' }}>
           {/* Welcome state */}
           {messages.length === 0 && !loading && (
             <div className="max-w-3xl mx-auto">
