@@ -1,5 +1,5 @@
 
-require('dotenv').config({ path: process.env.DOTENV_PATH || '/etc/secrets/.env' });
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 // Debug: Print all environment variables to verify they are set in Render
 console.log('ENV VARS:', process.env);
 
@@ -29,13 +29,19 @@ app.use(helmet({
 
 // CORS
 
+
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
-  'https://agrifather.vercel.app'
+  'https://agrifather.vercel.app',
+  'https://agrifather-57cwuh5m8-codewithashish14s-projects.vercel.app', // Vercel preview
+  'https://agrifather-ai9k.onrender.com', // Render backend (for direct API calls)
+  'https://agrifather-57cwuh5m8.vercel.app', // possible Vercel custom domain
+  'https://main--agrifather-frontend.netlify.app', // example Netlify preview
+  'https://agrifather.netlify.app', // example Netlify prod
 ];
 
 app.use(cors({
