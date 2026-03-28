@@ -15,7 +15,7 @@ async function groqChat({ messages, apiKey, model = 'llama3-70b-8192', maxTokens
     groqMessages.push({ role: msg.role, content: msg.content });
   }
   const body = JSON.stringify({
-    model,
+    model: model || 'llama3-70b-8k-english',
     messages: groqMessages,
     max_tokens: maxTokens
   });
