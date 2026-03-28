@@ -1,9 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
-}
+// ...existing code...
 
 const QUICK_TOPICS = [
   { icon: <Wheat size={16}/>, label: 'Crop Advisory', labelHi: 'फसल सलाह', prompt: 'Which crop should I sow this season in my region?' },
