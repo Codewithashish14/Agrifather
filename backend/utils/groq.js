@@ -1,5 +1,5 @@
 // Utility for calling Groq API
-const fetch = require('node-fetch');
+
 
 async function groqChat({ messages, apiKey, model = 'llama3-70b-8192', maxTokens = 2048, systemPrompt }) {
   const url = 'https://api.groq.com/openai/v1/chat/completions';
@@ -19,6 +19,7 @@ async function groqChat({ messages, apiKey, model = 'llama3-70b-8192', maxTokens
     messages: groqMessages,
     max_tokens: maxTokens
   });
+  // Use global fetch (Node 18+)
   const res = await fetch(url, { method: 'POST', headers, body });
   if (!res.ok) throw new Error(`Groq API error: ${res.status} ${await res.text()}`);
   const data = await res.json();
