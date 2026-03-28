@@ -1,7 +1,6 @@
 
+
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
-// Debug: Print all environment variables to verify they are set in Render
-console.log('ENV VARS:', process.env);
 
 // MongoDB (Mongoose) connection
 const mongoose = require('mongoose');
