@@ -62,7 +62,7 @@ router.post('/message', authenticate, checkPlan, upload.single('image'), async (
 
     const userMsgId = uuidv4();
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-    await createMessage({ id: userMsgId, conversation_id: convId, user_id: req.user.id, role: 'user', content: message || 'Please analyze this image', image_url: imageUrl });
+    await createMessage({ _id: userMsgId, conversation_id: convId, user_id: req.user.id, role: 'user', content: message || 'Please analyze this image', image_url: imageUrl });
 
     const history = await getConversationMessages(convId, 20);
     const anthropicMessages = history.map((msg, idx) => {
@@ -88,7 +88,7 @@ router.post('/message', authenticate, checkPlan, upload.single('image'), async (
 
     const assistantContent = response.content[0].text;
     const assistantMsgId = uuidv4();
-    await createMessage({ id: assistantMsgId, conversation_id: convId, user_id: req.user.id, role: 'assistant', content: assistantContent });
+    await createMessage({ _id: assistantMsgId, conversation_id: convId, user_id: req.user.id, role: 'assistant', content: assistantContent });
 
     const today = new Date().toISOString().split('T')[0];
     await updateUser(req.user.id, { messages_today: (req.user.messages_today || 0) + 1, last_message_date: today });
