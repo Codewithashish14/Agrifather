@@ -31,11 +31,11 @@ async function getUserConversations(userId) {
   return Conversation.find({ user_id: userId }).sort({ updated_at: -1 }).limit(50);
 }
 async function updateConversationTime(id) {
-  return Conversation.findByIdAndUpdate(id, { updated_at: new Date() });
+  return Conversation.findByIdAndUpdate(id, { updated_at: new Date() }); // id is now a string (UUID)
 }
 async function deleteConversation(id, userId) {
   await Message.deleteMany({ conversation_id: id });
-  return Conversation.deleteOne({ _id: id, user_id: userId });
+  return Conversation.deleteOne({ _id: id, user_id: userId }); // id is now a string (UUID)
 }
 
 // MESSAGE
