@@ -6,7 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   Send, Mic, MicOff, ImagePlus, X, Plus, Crown,
   Trash2, Wheat, Leaf, Bug, Droplets, Sun, Landmark,
-  BarChart3, Sprout, ChevronDown, Volume2, VolumeX, Loader2
+  BarChart3, Sprout, ChevronDown, Volume2, VolumeX, Loader2,
+  MessageSquare
 } from 'lucide-react';
 
 // Simple markdown parser
