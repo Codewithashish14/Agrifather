@@ -1,5 +1,5 @@
 const express = require('express');
-const Anthropic = require('@anthropic-ai/sdk');
+const { groqChat } = require('../utils/groq');
 const { v4: uuidv4 } = require('uuid');
 const { createConversation, findConversation, getUserConversations, updateConversationTime,
         deleteConversation, createMessage, getConversationMessages, getAllConversationMessages, updateUser } = require('../database/db');
@@ -65,28 +65,16 @@ router.post('/message', authenticate, checkPlan, upload.single('image'), async (
     await createMessage({ _id: userMsgId, conversation_id: convId, user_id: req.user.id, role: 'user', content: message || 'Please analyze this image', image_url: imageUrl });
 
     const history = await getConversationMessages(convId, 20);
-    const anthropicMessages = history.map((msg, idx) => {
-      if (msg.role === 'user' && msg.image_url && idx === history.length - 1 && req.file) {
-        const imgPath = path.join(__dirname, '..', msg.image_url);
-        if (fs.existsSync(imgPath)) {
-          return { role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: req.file.mimetype, data: fs.readFileSync(imgPath).toString('base64') }},
-            { type: 'text', text: msg.content }
-          ]};
-        }
-      }
-      return { role: msg.role, content: msg.content };
-    });
+    // Groq API does not support images, so only send text messages
+    const groqMessages = history.map((msg) => ({ role: msg.role, content: msg.content }));
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const response = await client.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: req.user.response_style === 'short' ? 512 : 2048,
-      system: getSystemPrompt(req.user),
-      messages: anthropicMessages
+    const assistantContent = await groqChat({
+      messages: groqMessages,
+      apiKey: process.env.GROQ_API_KEY,
+      model: 'llama3-70b-8192',
+      maxTokens: req.user.response_style === 'short' ? 512 : 2048,
+      systemPrompt: getSystemPrompt(req.user)
     });
-
-    const assistantContent = response.content[0].text;
     const assistantMsgId = uuidv4();
     await createMessage({ _id: assistantMsgId, conversation_id: convId, user_id: req.user.id, role: 'assistant', content: assistantContent });
 
