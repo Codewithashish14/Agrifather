@@ -71,7 +71,7 @@ router.post('/message', authenticate, checkPlan, upload.single('image'), async (
     const assistantContent = await groqChat({
       messages: groqMessages,
       apiKey: process.env.GROQ_API_KEY,
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       maxTokens: req.user.response_style === 'short' ? 512 : 2048,
       systemPrompt: getSystemPrompt(req.user)
     });
