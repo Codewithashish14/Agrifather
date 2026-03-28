@@ -20,15 +20,6 @@ import { useAuth } from '../contexts/AuthContext';
     } finally {
       setSending(false);
     }
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-    .replace(/^\* (.+)$/gm, '<li>$1</li>')
-    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-    .replace(/\n\n/g, '</p><p>')
-    .replace(/^(?!<[hbulcpb])(.+)$/gm, (m) => m.trim() ? `<p>${m}</p>` : '')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-forest-600 underline">$1</a>');
 }
 
 const QUICK_TOPICS = [
