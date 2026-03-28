@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  conversation_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' },
-  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  conversation_id: { type: String, ref: 'Conversation' },
+  user_id: { type: String, ref: 'User' },
   role: String,
   content: String,
   image_url: String,
